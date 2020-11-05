@@ -15,11 +15,16 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
+//Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
 int BUTTON_STATE = LOW, BuzzerPin = 4;
 static const int TARE_PIN = 3;
 // Boiling true = 1
 char Boiling = 0;
+
+// Set pin input/output
+pinMode(TARE_PIN, INPUT_PULLUP);
+pinMode(BuzzerPin, OUTPUT);
 
 void setup(void)
 {
@@ -66,6 +71,11 @@ int Rtempget(void) {
   } else {
   int Rtemp = EEPROM.read(0);
   };
+};
+
+// Buzzer function
+void BuzzerOutput(void) {
+  
 };
 
 void loop(void)
