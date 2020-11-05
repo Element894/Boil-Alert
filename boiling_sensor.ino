@@ -3,6 +3,9 @@
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
+// Declare lcd into the global namespace
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
 
@@ -13,7 +16,7 @@ OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
 
-int BUTTON_STATE = LOW;
+int BUTTON_STATE = LOW, BuzzerPin = 4;
 static const int TARE_PIN = 3;
 // Boiling true = 1
 char Boiling = 0;
@@ -51,7 +54,7 @@ int TareAverage(void) {
   };
   // Return the average as an integer so that the EEPROM can accept it
   Serial.print("Tare temperature set to: ");
-  Serial.print(static_cast<int>(Sum/AvgNum));
+  Serial.println(static_cast<int>(Sum/AvgNum));
   return static_cast<int>(Sum/AvgNum);
 };
 
@@ -76,14 +79,24 @@ void loop(void)
   // Check if temperature is within 2 degrees of reference value.
   if(sensors.getTempCByIndex(0)<Rtemp+2||sensors.getTempCByIndex(0)>Rtemp-2){
     Boiling = 1;
+    Serial.println("Lid temperature has reached reference temperature.");
+    lcd.setCursor(0,0);
+    lcd.print("Pot is boiling.");
   };
+  if(sensors.getTempCByIndex(0)<Rtemp) {
+    Serial.println("Lid temperature below reference temperature.");
+  };
+ 
   // Check if button is pressed, update with requirement to be held later.
   BUTTON_STATE = digitalRead(TARE_PIN);
   if(BUTTON_STATE == HIGH) {
     // Write the temperature to register 0
+    Serial.println("Received button input.");
     EEPROM.write(0, TareAverage());
+    lcd.setCursor(0,0);
+    lcd.print("Tared to ");
+    lcd.print(sensors.getTempCByIndex(0));
   };
   Serial.print("Temperature for Device 1 is: ");
-  Serial.print(sensors.getTempCByIndex(0)); // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire
-  
+  Serial.println(sensors.getTempCByIndex(0)); // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire 
 }
