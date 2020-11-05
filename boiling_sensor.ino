@@ -12,8 +12,6 @@ OneWire oneWire(ONE_WIRE_BUS);
 // Pass our oneWire reference to Dallas Temperature. 
 DallasTemperature sensors(&oneWire);
 
-// Reference variable for tare function
-int Rtemp = 60;
 
 int BUTTON_STATE = LOW;
 static const int TARE_PIN = 3;
@@ -22,6 +20,12 @@ char Boiling = 0;
 
 void setup(void)
 {
+  // Check reference temperature
+  if (EEPROM.read(0) == 0) {
+  int Rtemp = 60;
+  } else {
+  int Rtemp = EEPROM.read(0);
+};
   // Start serial port
   Serial.begin(9600);
   Serial.println("Beginning setup.");
@@ -32,10 +36,11 @@ void setup(void)
   pinMode(TARE_PIN, INPUT_PULLUP);
 }
 
-float TareAverage(void) {
+int TareAverage(void) {
   // Number of times to average
   int AvgNum = 5, Sum = 0;
   float Average = 0, Temperatures [AvgNum] = {};
+  
   for (char Tindex = 0; Tindex < AvgNum; Tindex++) {
     sensors.requestTemperatures();
     Temperatures[Tindex] = sensors.getTempCByIndex(0);
@@ -44,15 +49,26 @@ float TareAverage(void) {
   for (int a = 0; a < AvgNum; a++) {
     Sum += Temperatures[a];
   };
-  // Return the average
+  // Return the average as an integer so that the EEPROM can accept it
   Serial.print("Tare temperature set to: ");
-  Serial.print(Sum/AvgNum);
-  return Sum/AvgNum;
+  Serial.print(static_cast<int>(Sum/AvgNum));
+  return static_cast<int>(Sum/AvgNum);
+};
+
+// Passes the reference temperature to caller, created to avoid global scope variable.
+int Rtempget(void) {
+   // Check reference temperature
+  if (EEPROM.read(0) == 0) {
+  int Rtemp = 60;
+  } else {
+  int Rtemp = EEPROM.read(0);
+  };
 };
 
 void loop(void)
 { 
-
+  // Set reference temperature within loop scope.
+  int Rtemp = Rtempget();
   // call sensors.requestTemperatures() to issue a global temperature 
   // request to all devices on the bus
   sensors.requestTemperatures(); // Send the command to get temperatures
