@@ -1,7 +1,7 @@
 #include <LiquidCrystal_I2C.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#include <EEPROM.H>
+#include <EEPROM.h>
 
 // Data wire is plugged into pin 2 on the Arduino
 #define ONE_WIRE_BUS 2
@@ -32,6 +32,23 @@ void setup(void)
   pinMode(TARE_PIN, INPUT_PULLUP);
 }
 
+float TareAverage(void) {
+  // Number of times to average
+  int AvgNum = 5, Sum = 0;
+  float Average = 0, Temperatures [AvgNum] = {};
+  for (char Tindex = 0; Tindex < AvgNum; Tindex++) {
+    sensors.requestTemperatures();
+    Temperatures[Tindex] = sensors.getTempCByIndex(0);
+    delay(1000);
+  };
+  for (int a = 0; a < AvgNum; a++) {
+    Sum += Temperatures[a];
+  };
+  // Return the average
+  Serial.print("Tare temperature set to: ");
+  Serial.print(Sum/AvgNum);
+  return Sum/AvgNum;
+};
 
 void loop(void)
 { 
@@ -47,8 +64,9 @@ void loop(void)
   // Check if button is pressed, update with requirement to be held later.
   BUTTON_STATE = digitalRead(TARE_PIN);
   if(BUTTON_STATE == HIGH) {
-    
-  }
+    // Write the temperature to register 0
+    EEPROM.write(0, TareAverage());
+  };
   Serial.print("Temperature for Device 1 is: ");
   Serial.print(sensors.getTempCByIndex(0)); // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire
   
