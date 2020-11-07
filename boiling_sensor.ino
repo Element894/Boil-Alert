@@ -18,7 +18,7 @@ DallasTemperature sensors(&oneWire);
 
 //Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
-int BUTTON_STATE = LOW, BuzzerPin = 4, Rtemp = 60;
+int BUTTON_STATE = HIGH, BuzzerPin = 4, Rtemp = 60;
 static const int TARE_PIN = 3;
 // Boiling true = 1
 char Boiling = 0;
@@ -113,9 +113,10 @@ void loop(void)
  
   // Check if button is pressed, update with requirement to be held later.
   BUTTON_STATE = digitalRead(TARE_PIN);
-  if(BUTTON_STATE == HIGH) {
+  if(BUTTON_STATE == LOW) {
     // Write the temperature to register 0
     Serial.println("Received button input.");
+    Serial.println(digitalRead(TARE_PIN));
     EEPROM.write(0, TareAverage());
     lcd.setCursor(0,0);
     lcd.print("Tared to ");
@@ -123,4 +124,4 @@ void loop(void)
   };
   Serial.print("Temperature for Device 1 is: ");
   Serial.println(sensors.getTempCByIndex(0)); // Why "byIndex"? You can have more than one IC on the same bus. 0 refers to the first IC on the wire 
-}
+};
