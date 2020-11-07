@@ -1,7 +1,8 @@
 #include <LiquidCrystal_I2C.h>
-#include <OneWire.h>
+#include <OneWire.h> // Change to OneWire2.H, change is drop-in replacement
 #include <DallasTemperature.h>
 #include <EEPROM.h>
+
 
 // Declare lcd into the global namespace
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -94,6 +95,10 @@ void loop(void)
   if(sensors.getTempCByIndex(0)<Rtemp+2||sensors.getTempCByIndex(0)>Rtemp-2){
     Boiling = 1;
     Serial.println("Lid temperature has reached reference temperature.");
+    Serial.print("Temperature is: ");
+    Serial.println(sensors.getTempCByIndex(0));
+    Serial.print("Reference point is: ");
+    Serial.println(Rtemp);
     lcd.setCursor(0,0);
     lcd.print("Pot is boiling.");
   };
