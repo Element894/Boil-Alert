@@ -1,5 +1,5 @@
 #include <LiquidCrystal_I2C.h>
-#include <OneWire.h> // Change to OneWire2.H, change is drop-in replacement
+#include <OneWire.h> // Change to OneWire2.h, change is drop-in replacement
 #include <DallasTemperature.h>
 #include <EEPROM.h>
 
@@ -18,7 +18,7 @@ DallasTemperature sensors(&oneWire);
 
 //Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
-int BUTTON_STATE = LOW, BuzzerPin = 4;
+int BUTTON_STATE = LOW, BuzzerPin = 4, Rtemp = 60;
 static const int TARE_PIN = 3;
 // Boiling true = 1
 char Boiling = 0;
@@ -72,9 +72,14 @@ int TareAverage(void) {
 int Rtempget(void) {
    // Check reference temperature
   if (EEPROM.read(0) == 0) {
-  int Rtemp = 60;
-  } else {
+    int Rtemp = 60;
+    Serial.println("No value read from EEPROM, setting temperature to 60.");
+    return Rtemp;
+    } else {
   int Rtemp = EEPROM.read(0);
+  Serial.print("Value read from EEPROM is: ");
+  Serial.println(Rtemp);
+  return Rtemp;
   };
 };
 
