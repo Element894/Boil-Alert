@@ -22,17 +22,21 @@ static const int TARE_PIN = 3;
 // Boiling true = 1
 char Boiling = 0;
 
-// Set pin input/output
-pinMode(TARE_PIN, INPUT_PULLUP);
-pinMode(BuzzerPin, OUTPUT);
+
 
 void setup(void)
 {
+  // Set pin input/output
+  pinMode(TARE_PIN, INPUT_PULLUP);
+  pinMode(BuzzerPin, OUTPUT);
+  
   // Check reference temperature
   if (EEPROM.read(0) == 0) {
   int Rtemp = 60;
   } else {
   int Rtemp = EEPROM.read(0);
+  Serial.print("Read temperature from EEPROM: ");
+  Serial.println(Rtemp);
 };
   // Start serial port
   Serial.begin(9600);
