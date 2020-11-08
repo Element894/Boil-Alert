@@ -18,8 +18,8 @@ DallasTemperature sensors(&oneWire);
 
 //Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
-int BUTTON_STATE = HIGH, BuzzerPin = 4, Rtemp = 60;
-static const int TARE_PIN = 3;
+int BuzzerPin = 5, Rtemp = 60;
+static const int TARE_PIN = 4;
 // Boiling true = 1
 char Boiling = 0;
 
@@ -112,8 +112,8 @@ void loop(void)
   };
  
   // Check if button is pressed, update with requirement to be held later.
-  BUTTON_STATE = digitalRead(TARE_PIN);
-  if(BUTTON_STATE == LOW) {
+  // digital read value should be LOW because of the pull up resistor. Erroneous values are being pulled because a pull up resistor is needed on the circuit.
+  if(digitalRead(TARE_PIN) == LOW) {
     // Write the temperature to register 0
     Serial.println("Received button input.");
     Serial.println(digitalRead(TARE_PIN));
