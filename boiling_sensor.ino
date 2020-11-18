@@ -1,4 +1,5 @@
 #include <LiquidCrystal_I2C.h>
+#include <LiquidCrystal.h>
 #include <OneWire.h> // Change to OneWire2.h, change is drop-in replacement
 #include <DallasTemperature.h>
 #include <EEPROM.h>
@@ -7,7 +8,7 @@
 // Declare lcd into the global namespace
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// Data wire is plugged into pin 2 on the Arduino
+// Temperature sensor pin is set to 2
 #define ONE_WIRE_BUS 2
 
 // Setup a oneWire instance to communicate with any OneWire devices (not just Maxim/Dallas temperature ICs)
@@ -18,18 +19,20 @@ DallasTemperature sensors(&oneWire);
 
 //Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
-int BuzzerPin = 5, Rtemp = 60;
-static const int TARE_PIN = 4;
+int buzzerPin = 5, Rtemp = 60;
+static const int tarePin = 4;
 // Boiling true = 1
 char Boiling = 0;
 
-
+// Tare button timing variables
+//unsigned long interval = 3000;
+//unsigned long previousMillis = 0;
 
 void setup(void)
 {
   // Set pin input/output
-  pinMode(TARE_PIN, INPUT_PULLUP);
-  pinMode(BuzzerPin, OUTPUT);
+  pinMode(tarePin, INPUT_PULLUP);
+  pinMode(buzzerPin, OUTPUT);
   
   // Check reference temperature
   if (EEPROM.read(0) == 0) {
@@ -41,15 +44,15 @@ void setup(void)
 };
   // Start serial port
   Serial.begin(9600);
-  Serial.println("Beginning setup.");
+  Serial.println("Serial output initialized.");
 
   // Start up the library
   sensors.begin(); // IC Default 9 bit. If you have troubles consider upping it 12. Ups the delay giving the IC more time to process the temperature measurement
   // Tare input
-  pinMode(TARE_PIN, INPUT_PULLUP);
+  pinMode(tarePin, INPUT_PULLUP);
 }
 
-int TareAverage(void) {
+int tareAverage(void) {
   // Number of times to average
   int AvgNum = 5, Sum = 0;
   float Average = 0, Temperatures [AvgNum] = {};
@@ -57,7 +60,7 @@ int TareAverage(void) {
   for (char Tindex = 0; Tindex < AvgNum; Tindex++) {
     sensors.requestTemperatures();
     Temperatures[Tindex] = sensors.getTempCByIndex(0);
-    delay(1000);
+    delay(1000); // Replace with Millis code to keep cpu usage while the function waits
   };
   for (int a = 0; a < AvgNum; a++) {
     Sum += Temperatures[a];
@@ -84,7 +87,7 @@ int Rtempget(void) {
 };
 
 // Buzzer function
-void BuzzerOutput(void) {
+void buzzerOutput(void) {
   
 };
 
@@ -110,14 +113,24 @@ void loop(void)
   if(sensors.getTempCByIndex(0)<Rtemp) {
     Serial.println("Lid temperature below reference temperature.");
   };
+  
+  
+//  unsigned long currentMillis = millis();
+  // Check if button is pressed for at least 3 seconds.
+//  while(digitalRead(tarePin) == LOW && currentMillis - previousMillis < interval) {
+//    previousMillis = currentMillis;
+//    unsigned long currentMillis = millis();
+//  };
+
+  // Concept: play buzzer if temperature is >= 100
  
   // Check if button is pressed, update with requirement to be held later.
   // digital read value should be LOW because of the pull up resistor. Erroneous values are being pulled because a pull up resistor is needed on the circuit.
-  if(digitalRead(TARE_PIN) == LOW) {
+  if(digitalRead(tarePin) == LOW) {
     // Write the temperature to register 0
     Serial.println("Received button input.");
-    Serial.println(digitalRead(TARE_PIN));
-    EEPROM.write(0, TareAverage());
+    Serial.println(digitalRead(tarePin));
+    EEPROM.write(0, tareAverage());
     lcd.setCursor(0,0);
     lcd.print("Tared to ");
     lcd.print(sensors.getTempCByIndex(0));
