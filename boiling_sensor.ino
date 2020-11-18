@@ -20,7 +20,7 @@ DallasTemperature sensors(&oneWire);
 //Note: Update all names to a single format I.E. avoid mixing all caps and camel case
 
 int buzzerPin = 5, Rtemp = 60;
-static const int tarePin = 7;
+static const int tarePin = 4;
 // Boiling true = 1
 char Boiling = 0;
 
